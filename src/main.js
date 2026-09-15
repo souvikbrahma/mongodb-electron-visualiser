@@ -4,6 +4,8 @@ const fs = require("node:fs/promises");
 const crypto = require("node:crypto");
 const { MongoClient } = require("mongodb");
 
+const { runFlatQuery } = require("./flat-query");
+
 let mainWindow;
 let client;
 
@@ -117,6 +119,61 @@ ipcMain.handle("connections:delete", async (_event, id) => {
   return true;
 });
 
+function queriesPath() {
+  return path.join(app.getPath("userData"), "queries.json");
+}
+
+async function readQueries() {
+  try {
+    const queries = JSON.parse(await fs.readFile(queriesPath(), "utf8"));
+    return Array.isArray(queries) ? queries : [];
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw new Error("Could not read saved queries.");
+  }
+}
+
+async function writeQueries(queries) {
+  await fs.mkdir(path.dirname(queriesPath()), { recursive: true });
+  await fs.writeFile(queriesPath(), JSON.stringify(queries, null, 2), "utf8");
+}
+
+ipcMain.handle("queries:list", async () => readQueries());
+
+ipcMain.handle("queries:save", async (_event, query) => {
+  if (!query || typeof query.name !== "string") {
+    throw new Error("A query name is required.");
+  }
+  const name = query.name.trim();
+  if (!name || !query.databaseName || !query.collectionName) {
+    throw new Error("Choose a collection and enter a query name.");
+  }
+
+  const queries = await readQueries();
+  const savedQuery = {
+    id: query.id || crypto.randomUUID(),
+    name,
+    databaseName: query.databaseName,
+    collectionName: query.collectionName,
+    filter: query.filter || {},
+    sort: query.sort || {},
+    limit: query.limit || 100,
+    mode: query.mode === "flat" ? "flat" : "builder",
+    command: typeof query.command === "string" ? query.command : undefined,
+  };
+  const existingIndex = queries.findIndex((item) => item.id === savedQuery.id);
+  if (existingIndex >= 0) queries[existingIndex] = savedQuery;
+  else queries.unshift(savedQuery);
+  await writeQueries(queries);
+  return savedQuery;
+});
+
+ipcMain.handle("queries:delete", async (_event, id) => {
+  const queries = await readQueries();
+  await writeQueries(queries.filter((query) => query.id !== id));
+  return true;
+});
+
 ipcMain.handle(
   "mongo:collection",
   async (_event, { databaseName, collectionName }) => {
@@ -136,6 +193,29 @@ ipcMain.handle(
     };
   },
 );
+
+ipcMain.handle("mongo:query", async (_event, query) => {
+  if (!client) throw new Error("Connect to MongoDB before running a query.");
+  if (!query?.databaseName || !query?.collectionName) {
+    throw new Error("Choose a collection before running a query.");
+  }
+
+  if (query.mode === "flat") {
+    const result = await runFlatQuery(client.db(query.databaseName).collection(query.collectionName), query.command);
+    return { ...result, documents: result.documents.map(sanitiseDocument) };
+  }
+
+  const limit = Math.min(Math.max(Number(query.limit) || 100, 1), 500);
+  const cursor = client
+    .db(query.databaseName)
+    .collection(query.collectionName)
+    .find(query.filter && typeof query.filter === "object" ? query.filter : {});
+  if (query.sort && typeof query.sort === "object" && Object.keys(query.sort).length) {
+    cursor.sort(query.sort);
+  }
+  const documents = await cursor.limit(limit).toArray();
+  return { documents: documents.map(sanitiseDocument), limit };
+});
 
 app.whenReady().then(() => {
   createWindow();

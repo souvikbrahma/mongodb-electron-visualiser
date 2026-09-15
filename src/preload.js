@@ -8,4 +8,8 @@ contextBridge.exposeInMainWorld("mongoApi", {
   listConnections: () => ipcRenderer.invoke("connections:list"),
   saveConnection: (connection) => ipcRenderer.invoke("connections:save", connection),
   deleteConnection: (id) => ipcRenderer.invoke("connections:delete", id),
+  runQuery: (query) => ipcRenderer.invoke("mongo:query", query),
+  listQueries: () => ipcRenderer.invoke("queries:list"),
+  saveQuery: (query) => ipcRenderer.invoke("queries:save", query),
+  deleteQuery: (id) => ipcRenderer.invoke("queries:delete", id),
 });

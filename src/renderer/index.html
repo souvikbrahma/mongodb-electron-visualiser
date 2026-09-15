@@ -42,6 +42,14 @@
                 Show
               </button>
             </div>
+            <label for="connectionName">Connection name</label>
+            <input
+              class="connection-name-input"
+              id="connectionName"
+              type="text"
+              maxlength="48"
+              placeholder="e.g. Local MongoDB"
+            />
             <button class="connect-button" id="connectButton" type="button">
               <span id="connectLabel">Connect</span
               ><span class="spinner" id="connectSpinner"></span>
@@ -110,13 +118,66 @@
             </article>
           </div>
 
+          <section class="query-card">
+            <div class="query-card-header">
+              <div>
+                <span class="section-kicker">Query workspace</span>
+                <h3>Build and run a query</h3>
+              </div>
+              <span class="query-target" id="queryTarget">Choose a collection</span>
+            </div>
+            <div class="query-mode-switch" role="tablist" aria-label="Query editor mode">
+              <button class="query-mode-button active" id="builderModeButton" type="button" role="tab" aria-selected="true">Builder</button>
+              <button class="query-mode-button" id="flatModeButton" type="button" role="tab" aria-selected="false">Flat query</button>
+            </div>
+            <div class="query-grid">
+              <label class="query-field query-filter-field">
+                <span>Filter <small>JSON</small></span>
+                <textarea id="queryFilter" spellcheck="false">{}</textarea>
+              </label>
+              <label class="query-field">
+                <span>Sort <small>JSON</small></span>
+                <textarea id="querySort" spellcheck="false">{}</textarea>
+              </label>
+              <label class="query-field query-limit-field">
+                <span>Limit</span>
+                <input id="queryLimit" type="number" min="1" max="500" value="100" />
+              </label>
+            </div>
+            <label class="flat-query-field" id="flatQueryField">
+              <span>Flat query <small>Collection command</small></span>
+              <textarea id="flatQuery" spellcheck="false" placeholder='.find({ status: "active" }).limit(100)'>.find({}).limit(100)</textarea>
+              <small>Run against the selected collection: .find({}), .aggregate([...]), .insert({...}), .updateMany({...}, {...}), and more. Chain .sort(), .skip(), or .limit() on cursors. Writes take effect when you run the query.</small>
+            </label>
+            <p class="query-editor-help" id="queryEditorHelp">Tab to indent · Esc then Tab to leave · Ctrl+Space for suggestions · Cmd/Ctrl+Enter to run</p>
+            <p class="query-edit-status" id="queryEditStatus" role="status" hidden></p>
+            <div class="query-actions">
+              <input id="queryName" type="text" maxlength="48" placeholder="Name this query" />
+              <button class="query-save-button" id="saveQueryButton" type="button">Save query</button>
+              <button class="query-save-button" id="cancelQueryEditButton" type="button" hidden>Cancel edit</button>
+              <button class="query-run-button" id="runQueryButton" type="button">Run query <span class="spinner" id="querySpinner"></span></button>
+            </div>
+            <div class="query-error" id="queryError" role="alert"></div>
+            <div class="saved-query-strip">
+              <span class="section-kicker">Saved queries</span>
+              <div id="savedQueries" class="saved-query-list"><span class="tree-empty">No saved queries yet.</span></div>
+            </div>
+          </section>
+
           <div class="table-card" id="tableCard">
             <div class="table-toolbar">
               <div>
                 <span class="section-kicker">Collection view</span>
                 <h3 id="collectionTitle">Choose a collection</h3>
               </div>
-              <span class="record-count" id="recordCount"></span>
+              <div class="collection-view-controls">
+                <div class="viewer-switch" role="group" aria-label="Collection viewer">
+                  <button type="button" data-viewer="tree" aria-pressed="true">Tree</button>
+                  <button type="button" data-viewer="table" aria-pressed="false">Table</button>
+                  <button type="button" data-viewer="json" aria-pressed="false">JSON</button>
+                </div>
+                <span class="record-count" id="recordCount"></span>
+              </div>
             </div>
             <div class="table-wrap" id="tableWrap">
               <div class="table-empty">
@@ -136,6 +197,7 @@
         ><span>Desktop-first MongoDB inspection</span>
       </footer>
     </div>
+    <script src="./query-editors.bundle.js"></script>
     <script src="./renderer.js"></script>
   </body>
 </html>
