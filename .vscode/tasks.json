@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Mongo Visualiser",
+      "type": "shell",
+      "command": "npm start",
+      "problemMatcher": []
+    }
+  ]
+}

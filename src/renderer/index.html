@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mongo Visualiser</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="eyebrow">Local workspace</div>
+            <h1>Mongo Visualiser</h1>
+          </div>
+        </div>
+        <div class="connection-state" id="connectionState">
+          <span class="status-dot"></span> Not connected
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="sidebar">
+          <section class="connect-panel">
+            <div class="section-kicker">Connection</div>
+            <label for="connectionString">MongoDB URI</label>
+            <div class="input-wrap">
+              <input
+                id="connectionString"
+                type="password"
+                spellcheck="false"
+                placeholder="mongodb://localhost:27017"
+              />
+              <button
+                class="icon-button"
+                id="toggleVisibility"
+                type="button"
+                aria-label="Show connection string"
+              >
+                Show
+              </button>
+            </div>
+            <button class="connect-button" id="connectButton" type="button">
+              <span id="connectLabel">Connect</span
+              ><span class="spinner" id="connectSpinner"></span>
+            </button>
+            <p class="helper-text">
+              Your URI stays in this desktop session and is never sent anywhere
+              else.
+            </p>
+            <div class="error-message" id="errorMessage" role="alert"></div>
+            <button class="save-connection-button" id="saveConnectionButton" type="button">+ Save connection</button>
+          </section>
+
+          <section class="saved-panel">
+            <div class="tree-heading">
+              <span class="section-kicker">Saved connections</span>
+              <span class="tree-count" id="savedCount">0</span>
+            </div>
+            <div class="saved-connections" id="savedConnections">
+              <div class="tree-empty">No saved connections yet.</div>
+            </div>
+          </section>
+
+          <section class="tree-panel">
+            <div class="tree-heading">
+              <span class="section-kicker">Explorer</span
+              ><span class="tree-count" id="databaseCount">0 db</span>
+            </div>
+            <div class="database-tree" id="databaseTree">
+              <div class="tree-empty">Connect to load your databases.</div>
+            </div>
+          </section>
+        </aside>
+
+        <section class="content-area">
+          <div class="content-header">
+            <div>
+              <div class="breadcrumb" id="breadcrumb">
+                Workspace <span>/</span> Overview
+              </div>
+              <h2 id="viewTitle">A clear view of your data.</h2>
+              <p id="viewSubtitle">
+                Connect to a MongoDB deployment to inspect its databases and
+                collections.
+              </p>
+            </div>
+            <div class="header-stat" id="headerStat">
+              <strong>--</strong><span>documents loaded</span>
+            </div>
+          </div>
+
+          <div class="overview-grid" id="overviewGrid">
+            <article class="metric-card accent-card">
+              <span class="metric-label">Databases</span
+              ><strong id="databaseMetric">--</strong
+              ><span class="metric-note">Across this deployment</span>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Collections</span
+              ><strong id="collectionMetric">--</strong
+              ><span class="metric-note">Ready to explore</span>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Status</span
+              ><strong id="statusMetric">Idle</strong
+              ><span class="metric-note">Waiting for a connection</span>
+            </article>
+          </div>
+
+          <div class="table-card" id="tableCard">
+            <div class="table-toolbar">
+              <div>
+                <span class="section-kicker">Collection view</span>
+                <h3 id="collectionTitle">Choose a collection</h3>
+              </div>
+              <span class="record-count" id="recordCount"></span>
+            </div>
+            <div class="table-wrap" id="tableWrap">
+              <div class="table-empty">
+                <div class="empty-glyph">{ }</div>
+                <h3>Your documents will appear here</h3>
+                <p>
+                  Select a collection from the explorer to inspect up to 100
+                  recent documents.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="footer">
+        <span>Mongo Visualiser</span
+        ><span>Desktop-first MongoDB inspection</span>
+      </footer>
+    </div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
